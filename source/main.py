@@ -1,4 +1,5 @@
-from agent import DFS, BFS, Dijkstra
+from argparse import ArgumentDefaultsHelpFormatter
+from agent import DFS, BFS, AStar, Dijkstra, GBFS
 from puzzle import PuzzleEnv
 from graph import Node
 from copy import deepcopy
@@ -27,14 +28,17 @@ from copy import deepcopy
 
 if __name__ == "__main__":
     initial = [[1, 2, 3, 4], [5, 6, 7, 8], [-1, 10, 11, 12], [9, 13, 14, 15]]
+    initial = [[1, 2, 3, 4], [5, -1, 7, 8], [9, 6, 10, 11], [13, 14, 15, 12]]
     goal = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, -1]]
     puzzle = PuzzleEnv(initial, goal, 4, 4)
     root = Node(puzzle, None)
     # Gera Aleatoriamente o estado inicial
-    puzzle.generate_initial_state()
+    # puzzle.generate_initial_state()
     agentBFS = BFS(2000)
     agentDFS = DFS(2000)
-    dijkstra = Dijkstra(0)
+    agentDijkstra = Dijkstra(15000)
+    agentGBFS = GBFS(16000)
+    agentAStar = AStar(15000)
     print("Estado Inicial: ")
     print(puzzle)
 
@@ -42,8 +46,12 @@ if __name__ == "__main__":
     print(agentBFS)
     agentDFS.search(deepcopy(root))
     print(agentDFS)
-    dijkstra.search(deepcopy(root))
-    print(dijkstra)
+    agentDijkstra.search(deepcopy(root))
+    print(agentDijkstra)
+    agentGBFS.search(deepcopy(root))
+    print(agentGBFS)
+    agentAStar.search(deepcopy(root))
+    print(agentAStar)
 
 # puzzleUI = PuzzleUI(600, 600, 4, 4, puzzle, agent)
 # puzzleUI.show()

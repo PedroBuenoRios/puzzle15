@@ -32,22 +32,12 @@ class PuzzleEnv(ABCEnviroment):
         ''' 
         Gera um estado inicial aleatório
         '''
-        rows, colls = self.rows, self.colls
-        self.initial_state = list(range(1, colls*rows))
-        self.initial_state.append(-1)
+        state = np.asarray(self.goal_state).flatten().tolist()
         random.seed(time.time())
-        random.shuffle(self.initial_state)
-        stride = 0
-        state = []
-
-        for i in range(colls):
-            step = colls*(i+1)
-            row = self.initial_state[stride:step]
-            stride = step
-            state.append(row)
-
+        random.shuffle(state)
+        state = np.asarray(state).reshape((self.rows, self.colls)).tolist()
         self.initial_state = state
-        self.state = [row.copy() for row in state]
+        self.state = [row.copy() for row in self.initial_state]
         self.empty_row, self.empty_coll = self.get_indices()
 
     def is_goal_state(self):

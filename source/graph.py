@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field 
+from dataclasses import dataclass, field
+from copy import copy
 from puzzle import PuzzleEnv
 from typing import Any
 
@@ -17,6 +18,7 @@ class Node:
         self.distance_from_root = 0
         self.opened = True
         self.predecessor = None
+        self.actions_taked = []
 
     def is_goal(self):
         return self.env.is_goal_state()
@@ -31,8 +33,9 @@ class Node:
 
         for action, state in zip(env.possible_actions, env.possible_states):
             newEnv = PuzzleEnv(state, env.goal_state, env.colls, env.rows)
-            newEnv.action_taked = action
             newNode = Node(newEnv, self)
+            newNode.actions_taked = copy(self.actions_taked)
+            newNode.actions_taked.append(action)
             self.children.append(newNode)
 
         self.calculate_distances_to_children()

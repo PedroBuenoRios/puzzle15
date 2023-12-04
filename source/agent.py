@@ -33,11 +33,11 @@ class Agent():
         '''
             Gera e retorn o histórico de ações para ir do estado inicial ao final
         '''
-        self.__make_nodes_history(node)
-        for node in self.nodes_history:
-            if node.env.action_taked is not None:
-                self.actions_history.append(node.env.action_taked)
-        return self.actions_history
+        #self.__make_nodes_history(node)
+        #for node in self.nodes_history:
+        #    if node.env.action_taked is not None:
+        #        self.actions_history.append(node.env.action_taked)
+        return node.actions_taked
 
     def __str__(self):
         str = f"Estado Inicial {self.__class__.__name__}: \n"
@@ -45,8 +45,6 @@ class Agent():
         str += f"Estado Final {self.__class__.__name__}: \n"
         str += f"{self.final_node.env}"
         str += f"Nós Gerados: {self.total_nodes_generated}\n"
-        str += f"Nós visitados: {len(self.frontier)}\n"
-        str += f"Nós explorados: {len(self.explored_nodes)}\n"
         str += f"Passos: {self.steps}\n"
         actions = self.get_actions_history(self.final_node)
         actions = [action.name for action in actions if action != 'ROOT']
@@ -61,7 +59,6 @@ class Agent():
 
     def count_total_nodes(self, node):
         self.total_nodes_generated = node.count_total_nodes()
-
 
 # Busca em Profundidade (Depth-First Search)
 class DFS(Agent):
@@ -186,17 +183,17 @@ class Dijkstra(Agent):
         initial_node.opened = True
         initial_node.predecessor = None
         self.explored_nodes = []
-        print('Gerando nós...')
-        initial_node.generate_levels(11)
+        # print('Gerando nós...')
+        # initial_node.generate_levels(11)
         self.priority_queue.put(PrioritizedNode(initial_node.distance_from_root, initial_node))
         print("Dijkstra procurando...")
-        while self.exists_opened_vertices() and self.steps < self.maxSteps:  
+        while not self.priority_queue.empty() and self.steps < self.maxSteps:  
             current_node = self.priority_queue.get()
             self.explored_nodes.append(current_node.item)
             if current_node.item.env.is_goal_state():
                 self.final_node = current_node.item
                 break
-            # current_node.item.generate_children()
+            current_node.item.generate_children()
             self.init_dists(current_node.item)
 
             for child in current_node.item.children:  
@@ -217,7 +214,9 @@ class Dijkstra(Agent):
                 if not IN_QUEUE and not IN_EXPLORED:
                     self.priority_queue.put(PrioritizedNode(child.distance_from_root, child))
 
-            self.final_node = Node(current_node.item.env, current_node.item.parent)
+            self.final_node = current_node.item
+            if self.steps % 1000 == 0 and self.steps != 0:
+                print(self)
             self.steps += 1
 
         self.count_total_nodes(self.initial_node)
@@ -229,26 +228,93 @@ class Dijkstra(Agent):
             child.predecessor = None
             child.opened = True
             self.init_dists(child)
-
-    def exists_opened_vertices(self):
-        if not self.priority_queue.empty():
-            return True
-        return False
     
-    def __str__(self):
-        str = f"Estado Inicial {self.__class__.__name__}: \n"
-        str += f"{self.initial_node.env}\n"
-        str += f"Estado Final {self.__class__.__name__}: \n"
-        str += f"{self.final_node.env}"
-        str += f"Nós Gerados: {self.total_nodes_generated}\n"
-        str += f"Passos: {self.steps}\n"
-        actions = self.get_actions_history(self.final_node)
-        actions = [action.name for action in actions if action != 'ROOT']
-        total_actions = len(actions)
-        str += "Ações para ir do estado inicial para o final: \n"
-        if total_actions > 20:
-            actions = actions[:20]
-            str += f"{actions} ... + {total_actions - 19}\n"
-        else:
-            str += f"{actions} \n"
-        return str
+# Busca Gulosa (Greedy Best-First Search)
+class GBFS(Agent):
+    def __init__(self, maxSteps: int):
+        super().__init__(maxSteps)
+
+    def search(self, initial_node: Node, callback = None):
+        self.steps = 0
+        self.priority_queue = PriorityQueue()
+        self.initial_node = initial_node
+        initial_node.distance_from_parent = 0
+        self.explored_nodes = []
+        # print('Gerando nós...')
+        # initial_node.generate_levels(11)
+        self.priority_queue.put(PrioritizedNode(initial_node.distance_from_parent, initial_node))
+        print("GBFS procurando...")
+        while not self.priority_queue.empty() and self.steps < self.maxSteps:  
+            current_node = self.priority_queue.get()
+            self.explored_nodes.append(current_node.item)
+            if current_node.item.env.is_goal_state():
+                self.final_node = current_node.item
+                break
+            current_node.item.generate_children()
+            # self.init_dists(current_node.item)
+                
+            for child in current_node.item.children:  
+                IN_QUEUE, IN_EXPLORED = False, False
+                for node in self.explored_nodes:
+                    if node.env == child.env:
+                        IN_EXPLORED = True
+
+                for node in self.priority_queue.queue:
+                    if node.item.env == child.env:
+                        IN_QUEUE = True
+
+                if not IN_QUEUE and not IN_EXPLORED:
+                    self.priority_queue.put(PrioritizedNode(child.distance_from_parent, child))
+
+            self.final_node = current_node.item
+            if self.steps % 1000 == 0 and self.steps != 0:
+                print(self)
+            self.steps += 1
+
+        self.count_total_nodes(self.initial_node)
+        return self.final_node
+    
+# A*
+class AStar(Agent):
+    def __init__(self, maxSteps: int):
+        super().__init__(maxSteps)
+
+    def search(self, initial_node: Node, callback = None):
+        self.steps = 0
+        self.priority_queue = PriorityQueue()
+        self.initial_node = initial_node
+        initial_node.distance_from_parent = 0
+        self.explored_nodes = []
+        self.priority_queue.put(PrioritizedNode(initial_node.distance_from_parent, initial_node))
+        print("GBFS procurando...")
+        while not self.priority_queue.empty() and self.steps < self.maxSteps:  
+            current_node = self.priority_queue.get()
+            self.explored_nodes.append(current_node.item)
+
+            if current_node.item.env.is_goal_state():
+                self.final_node = current_node.item
+                break
+
+            current_node.item.generate_children()
+                
+            for child in current_node.item.children:  
+                IN_QUEUE, IN_EXPLORED = False, False
+                for node in self.explored_nodes:
+                    if node.env == child.env:
+                        IN_EXPLORED = True
+
+                for node in self.priority_queue.queue:
+                    if node.item.env == child.env:
+                        IN_QUEUE = True
+
+                if not IN_QUEUE and not IN_EXPLORED:
+                    sum = child.distance_from_parent + len(child.actions_taked)
+                    self.priority_queue.put(PrioritizedNode(sum, child))
+
+            self.final_node = current_node.item
+            if self.steps % 1000 == 0 and self.steps != 0:
+                print(self)
+            self.steps += 1
+
+        self.count_total_nodes(self.initial_node)
+        return self.final_node
