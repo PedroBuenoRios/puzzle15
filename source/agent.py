@@ -65,7 +65,7 @@ class DFS(Agent):
     def __init__(self, maxSteps):
         super().__init__(maxSteps)
 
-    def search(self, initial_node, callback = None):
+    def search(self, initial_node):
         '''
             Retorna o estado solução se encontrou ou -1 se não encontrou o estado solução    
         '''
@@ -94,7 +94,7 @@ class DFS(Agent):
                 break
             # Se não for o objetivo então adiciona na lista de explorados e gera os possíveis estado a partir dele
             self.explored_nodes.append(current_node)
-            current_node.generate_children(callback)
+            current_node.generate_children()
             
             for child in current_node.children:
                 IN_FRONTIER, IN_EXPLORED = [], []
@@ -128,7 +128,7 @@ class BFS(Agent):
     def __init__(self, maxSteps):
         super().__init__(maxSteps)
     
-    def search(self, initial_node, callback = None): 
+    def search(self, initial_node): 
         self.initial_node = initial_node
         # Nós visitados
         self.frontier = [initial_node]
@@ -152,7 +152,7 @@ class BFS(Agent):
             # Adiciona o estado atual na lista de nós explorados
             self.explored_nodes.append(current_node)
             # Gera os estados possíveis a partir do estado atual
-            current_node.generate_children(callback)
+            current_node.generate_children()
 
             for child in current_node.children:
                 IN_FRONTIER, IN_EXPLORED = [], []
@@ -175,7 +175,7 @@ class Dijkstra(Agent):
     def __init__(self, maxSteps: int):
         super().__init__(maxSteps)
 
-    def search(self, initial_node: Node, callback = None):
+    def search(self, initial_node: Node):
         self.steps = 0
         self.priority_queue = PriorityQueue()
         self.initial_node = initial_node
@@ -225,8 +225,6 @@ class Dijkstra(Agent):
     def init_dists(self, initial_node: Node):
         for child in initial_node.children:
             child.distance_from_root = float("inf")
-            child.predecessor = None
-            child.opened = True
             self.init_dists(child)
     
 # Busca Gulosa (Greedy Best-First Search)
@@ -234,14 +232,12 @@ class GBFS(Agent):
     def __init__(self, maxSteps: int):
         super().__init__(maxSteps)
 
-    def search(self, initial_node: Node, callback = None):
+    def search(self, initial_node: Node):
         self.steps = 0
         self.priority_queue = PriorityQueue()
         self.initial_node = initial_node
         initial_node.distance_from_parent = 0
         self.explored_nodes = []
-        # print('Gerando nós...')
-        # initial_node.generate_levels(11)
         self.priority_queue.put(PrioritizedNode(initial_node.distance_from_parent, initial_node))
         print("GBFS procurando...")
         while not self.priority_queue.empty() and self.steps < self.maxSteps:  
@@ -251,7 +247,6 @@ class GBFS(Agent):
                 self.final_node = current_node.item
                 break
             current_node.item.generate_children()
-            # self.init_dists(current_node.item)
                 
             for child in current_node.item.children:  
                 IN_QUEUE, IN_EXPLORED = False, False
@@ -279,7 +274,7 @@ class AStar(Agent):
     def __init__(self, maxSteps: int):
         super().__init__(maxSteps)
 
-    def search(self, initial_node: Node, callback = None):
+    def search(self, initial_node: Node):
         self.steps = 0
         self.priority_queue = PriorityQueue()
         self.initial_node = initial_node

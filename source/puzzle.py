@@ -14,8 +14,8 @@ class PuzzleEnv(ABCEnviroment):
     def __init__(self, initial_state, goal_state, colls = 4, rows = 4):
         self.rows = rows
         self.colls = colls
-        self.initial_state = initial_state
-        self.state = [row.copy() for row in initial_state]
+        self.initial_state = initial_state if initial_state is not None else []
+        self.state = [row.copy() for row in self.initial_state]
         self.goal_state = goal_state
         self.action_taked = None
         self.parent = None

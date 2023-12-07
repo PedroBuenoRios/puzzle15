@@ -23,7 +23,7 @@ class Node:
     def is_goal(self):
         return self.env.is_goal_state()
 
-    def generate_children(self, callback = None):
+    def generate_children(self):
         '''
          Retorna os possíveis estados futuros
         '''
@@ -39,8 +39,6 @@ class Node:
             self.children.append(newNode)
 
         self.calculate_distances_to_children()
-        if callback is not None:
-            callback(self)
 
     def calculate_distances_to_children(self):
         for child in self.children:
