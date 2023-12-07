@@ -1,3 +1,6 @@
+---
+mathjax: true
+---
 # puzzle15
 
 ## Soluciona o problema do Puzzle-15 com diferentes algoritmos
