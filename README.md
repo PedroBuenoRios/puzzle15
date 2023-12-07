@@ -1,6 +1,3 @@
----
-mathjax: true
----
 # puzzle15
 
 ## Soluciona o problema do Puzzle-15 com diferentes algoritmos
@@ -10,9 +7,9 @@ Então foram desenvolvidos os algoritmos: BFS; DFS; Dijkstra; GBFS; A*.
 
 A heurística usada no Dijkstra, GBFS e A* é a distância de Manhatan.
 Podemos calcular a distâncida de Manhatan como:
-$$
+
     |x_2 - x_1| + |y_2 - y_1|
-$$
+
 
 
 ### BFS (Breadth-First Search ou Busca em Largura):
